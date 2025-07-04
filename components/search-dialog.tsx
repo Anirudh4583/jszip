@@ -140,7 +140,7 @@ export function SearchDialog({
           const matches: SearchResult["matches"] = [];
           const regex = new RegExp(
             searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-            "gi",
+            "gi"
           );
 
           lines.forEach((line, index) => {
@@ -183,7 +183,7 @@ export function SearchDialog({
 
   const handleResultClick = (
     result: SearchResult,
-    match: SearchResult["matches"][0],
+    match: SearchResult["matches"][0]
   ) => {
     onFileSelect(result.file, match.line);
     onClose();
@@ -192,7 +192,7 @@ export function SearchDialog({
   const highlightMatch = (
     content: string,
     matchStart: number,
-    matchEnd: number,
+    matchEnd: number
   ) => {
     const before = content.slice(0, matchStart);
     const match = content.slice(matchStart, matchEnd);
@@ -211,7 +211,7 @@ export function SearchDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Search className="w-5 h-5" />
@@ -265,7 +265,7 @@ export function SearchDialog({
               {results.length === 0 && query && !isSearching ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No matches found for "{query}"</p>
+                  <p>No matches found for &quot;{query}&quot;</p>
                 </div>
               ) : (
                 results.map((result, resultIndex) => (
@@ -292,7 +292,7 @@ export function SearchDialog({
                           key={`${result.file.path}-${match.line}-${matchIndex}`}
                           className={cn(
                             "w-full text-left p-2 rounded border hover:bg-accent/50 transition-colors",
-                            "text-sm font-mono",
+                            "text-sm font-mono"
                           )}
                           onClick={() => handleResultClick(result, match)}
                         >
@@ -304,7 +304,7 @@ export function SearchDialog({
                               {highlightMatch(
                                 match.content,
                                 match.matchStart,
-                                match.matchEnd,
+                                match.matchEnd
                               )}
                             </div>
                             <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
