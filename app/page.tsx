@@ -67,7 +67,7 @@ export default function Home() {
         ]);
       }
     },
-    [archive, openFiles]
+    [archive, openFiles],
   );
 
   const handleFileDownload = useCallback(
@@ -81,7 +81,7 @@ export default function Home() {
         console.error("Error downloading file:", error);
       }
     },
-    [archive]
+    [archive],
   );
 
   const handleSearchFileSelect = useCallback(
@@ -110,7 +110,7 @@ export default function Home() {
         setTimeout(() => setHighlightLine(undefined), 100);
       }
     },
-    [archive, openFiles]
+    [archive, openFiles],
   );
 
   const getFileContentForSearch = useCallback(
@@ -118,7 +118,7 @@ export default function Home() {
       if (!archive) return "";
       return getFileContent(archive, path);
     },
-    [archive]
+    [archive],
   );
 
   const totalFiles = useMemo(() => {

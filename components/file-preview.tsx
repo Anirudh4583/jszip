@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
-import { Editor } from '@monaco-editor/react';
-import { useTheme } from 'next-themes';
-import { FileNode, getFileExtension, getLanguageFromExtension, formatBytes } from '@/lib/file-utils';
-import { Button } from '@/components/ui/button';
-import { Download, File, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef } from "react";
+import { Editor } from "@monaco-editor/react";
+import { useTheme } from "next-themes";
+import {
+  FileNode,
+  getFileExtension,
+  getLanguageFromExtension,
+  formatBytes,
+} from "@/lib/file-utils";
+import { Button } from "@/components/ui/button";
+import { Download, File, Copy, Check } from "lucide-react";
+import { useState } from "react";
 
 interface FilePreviewProps {
   file: FileNode;
@@ -21,7 +26,7 @@ export function FilePreview({ file, content, onDownload }: FilePreviewProps) {
 
   const extension = getFileExtension(file.name);
   const language = getLanguageFromExtension(extension);
-  const isBinaryFile = content.startsWith('[Binary file');
+  const isBinaryFile = content.startsWith("[Binary file");
 
   const handleCopy = async () => {
     try {
@@ -29,13 +34,13 @@ export function FilePreview({ file, content, onDownload }: FilePreviewProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      console.error("Failed to copy:", error);
     }
   };
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
-    
+
     // Configure editor
     editor.updateOptions({
       fontSize: 14,
@@ -56,11 +61,11 @@ export function FilePreview({ file, content, onDownload }: FilePreviewProps) {
           <div>
             <h3 className="font-medium">{file.name}</h3>
             <p className="text-sm text-muted-foreground">
-              {file.size ? formatBytes(file.size) : 'Unknown size'} • {language}
+              {file.size ? formatBytes(file.size) : "Unknown size"} • {language}
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -73,7 +78,7 @@ export function FilePreview({ file, content, onDownload }: FilePreviewProps) {
             ) : (
               <Copy className="w-4 h-4 mr-2" />
             )}
-            {copied ? 'Copied!' : 'Copy'}
+            {copied ? "Copied!" : "Copy"}
           </Button>
           <Button variant="outline" size="sm" onClick={onDownload}>
             <Download className="w-4 h-4 mr-2" />
@@ -90,7 +95,9 @@ export function FilePreview({ file, content, onDownload }: FilePreviewProps) {
               <File className="w-12 h-12 mx-auto mb-2 opacity-50" />
               <p className="font-medium">Binary File</p>
               <p className="text-sm">Cannot preview binary content</p>
-              <p className="text-xs mt-2">Use the download button to save the file</p>
+              <p className="text-xs mt-2">
+                Use the download button to save the file
+              </p>
             </div>
           </div>
         ) : (
@@ -98,7 +105,7 @@ export function FilePreview({ file, content, onDownload }: FilePreviewProps) {
             height="100%"
             language={language}
             value={content}
-            theme={theme === 'dark' ? 'vs-dark' : 'light'}
+            theme={theme === "dark" ? "vs-dark" : "light"}
             onMount={handleEditorDidMount}
             options={{
               readOnly: true,
@@ -107,8 +114,8 @@ export function FilePreview({ file, content, onDownload }: FilePreviewProps) {
               minimap: { enabled: false },
               scrollBeyondLastLine: false,
               automaticLayout: true,
-              wordWrap: 'on',
-              lineNumbers: 'on',
+              wordWrap: "on",
+              lineNumbers: "on",
               glyphMargin: false,
               folding: true,
               lineDecorationsWidth: 0,

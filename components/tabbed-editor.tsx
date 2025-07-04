@@ -157,7 +157,7 @@ export function TabbedEditor({
               glyphMarginClassName: "search-highlight-glyph",
             },
           },
-        ]
+        ],
       );
 
       // Remove highlight after 3 seconds
@@ -189,7 +189,7 @@ export function TabbedEditor({
       // Clean up editor reference
       delete editorsRef.current[tabId];
     },
-    [activeTab]
+    [activeTab],
   );
 
   const handleCopy = async (tabId: string, content: string) => {
@@ -278,7 +278,7 @@ export function TabbedEditor({
                         value={tab.id}
                         className={cn(
                           "flex items-center space-x-1 px-2 py-1.5 text-sm max-w-[200px]",
-                          "data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                          "data-[state=active]:bg-background data-[state=active]:shadow-sm",
                         )}
                       >
                         <Icon className="w-4 h-4 flex-shrink-0" />
@@ -290,7 +290,7 @@ export function TabbedEditor({
                         size="sm"
                         className={cn(
                           "absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100",
-                          "hover:bg-destructive hover:text-destructive-foreground transition-all"
+                          "hover:bg-destructive hover:text-destructive-foreground transition-all",
                         )}
                         onClick={(e) => {
                           e.stopPropagation();
