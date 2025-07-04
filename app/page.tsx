@@ -6,7 +6,11 @@ import { FileUpload } from "@/components/file-upload";
 import { FileTree } from "@/components/file-tree";
 import { TabbedEditor } from "@/components/tabbed-editor";
 import { SearchDialog } from "@/components/search-dialog";
-import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 import {
   FileNode,
   parseArchive,
@@ -16,6 +20,7 @@ import {
 } from "@/lib/file-utils";
 import { Archive, Folder, FileText, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const [archive, setArchive] = useState<JSZip | null>(null);
@@ -67,8 +72,12 @@ export default function Home() {
         ]);
       }
     },
-    [archive, openFiles],
+    [archive, openFiles]
   );
+
+  const handleCloseTab = useCallback((filePath: string) => {
+    setOpenFiles((prev) => prev.filter((f) => f.file.path !== filePath));
+  }, []);
 
   const handleFileDownload = useCallback(
     async (node: FileNode) => {
@@ -81,7 +90,7 @@ export default function Home() {
         console.error("Error downloading file:", error);
       }
     },
-    [archive],
+    [archive]
   );
 
   const handleSearchFileSelect = useCallback(
@@ -110,7 +119,7 @@ export default function Home() {
         setTimeout(() => setHighlightLine(undefined), 100);
       }
     },
-    [archive, openFiles],
+    [archive, openFiles]
   );
 
   const getFileContentForSearch = useCallback(
@@ -118,7 +127,7 @@ export default function Home() {
       if (!archive) return "";
       return getFileContent(archive, path);
     },
-    [archive],
+    [archive]
   );
 
   const totalFiles = useMemo(() => {
@@ -147,39 +156,40 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/80">
-      {/* Header */}
-      {/* <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="px-3 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Archive className="w-6 h-6 text-primary" />
+      {!archiveFile && (
+        // Header
+        <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+          <div className="px-3 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Archive className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold">Archive Explorer</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Browse JAR & ZIP files with tabbed editor and search
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold">Archive Explorer</h1>
-                <p className="text-sm text-muted-foreground">
-                  Browse JAR & ZIP files with tabbed editor and search
-                </p>
-              </div>
-            </div>
 
-            <div className="flex items-center space-x-2">
-              {archiveFile && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsSearchOpen(true)}
-                >
-                  <Search className="w-4 h-4 mr-2" />
-                  Search
-                </Button>
-              )}
-              <ThemeToggle />
+              <div className="flex items-center space-x-2">
+                {archiveFile && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsSearchOpen(true)}
+                  >
+                    <Search className="w-4 h-4 mr-2" />
+                    Search
+                  </Button>
+                )}
+                <ThemeToggle />
+              </div>
             </div>
           </div>
-        </div>
-      </header> */}
-
+        </header>
+      )}
       <main className="px-3 py-6">
         {!archiveFile ? (
           <div className="flex flex-col items-center justify-center min-h-fit space-y-8">
@@ -259,16 +269,23 @@ export default function Home() {
             </div>
 
             {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 min-h-[80vh]">
+            <ResizablePanelGroup
+              direction="horizontal"
+              className="gap-2 min-h-[85vh]"
+            >
               {/* File Tree */}
-              <div className="lg:col-span-4 bg-card/50 rounded-lg border overflow-hidden">
+              <ResizablePanel
+                defaultSize={25}
+                minSize={15}
+                className="bg-card/50 rounded-lg border overflow-hidden"
+              >
                 <div className="p-3 border-b">
                   <h3 className="font-medium">File Explorer</h3>
                   <p className="text-sm text-muted-foreground">
                     {totalFiles} files in archive
                   </p>
                 </div>
-                <div className="p-1 max-h-[80vh] overflow-auto">
+                <div className="p-1 max-h-[85vh] overflow-auto">
                   <FileTree
                     nodes={fileTree}
                     onFileSelect={handleFileTreeSelect}
@@ -276,18 +293,25 @@ export default function Home() {
                     selectedFile={openFiles[openFiles.length - 1]?.file.path}
                   />
                 </div>
-              </div>
+              </ResizablePanel>
+
+              <ResizableHandle withHandle />
 
               {/* Tabbed Editor */}
-              <div className="lg:col-span-8 bg-card/50 rounded-lg border overflow-hidden">
+              <ResizablePanel
+                defaultSize={75}
+                minSize={30}
+                className="bg-card/50 rounded-lg border overflow-hidden"
+              >
                 <TabbedEditor
                   files={openFiles}
                   onFileDownload={handleFileDownload}
                   onSearchOpen={() => setIsSearchOpen(true)}
                   highlightLine={highlightLine}
+                  onCloseTab={handleCloseTab}
                 />
-              </div>
-            </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
         )}
       </main>
