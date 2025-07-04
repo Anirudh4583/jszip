@@ -107,6 +107,7 @@ export async function parseArchive(file: File): Promise<FileNode[]> {
           path: currentPath,
           isDirectory,
           children: isDirectory ? [] : undefined,
+          // @ts-ignore
           size: isDirectory ? undefined : zipEntry._data?.uncompressedSize || 0,
         };
 
@@ -153,7 +154,7 @@ export async function parseArchive(file: File): Promise<FileNode[]> {
 
 export async function getFileContent(
   archive: JSZip,
-  filePath: string,
+  filePath: string
 ): Promise<string> {
   const file = archive.file(filePath);
   if (!file) throw new Error("File not found");
@@ -170,7 +171,9 @@ export async function getFileContent(
       for (let i = 0; i < bytes.byteLength; i++) {
         binary += String.fromCharCode(bytes[i]);
       }
-      return `[Binary file - ${formatBytes(binaryContent.byteLength)}]\n\nBase64 content:\n${btoa(binary)}`;
+      return `[Binary file - ${formatBytes(
+        binaryContent.byteLength
+      )}]\n\nBase64 content:\n${btoa(binary)}`;
     } catch {
       return "[Unable to read file content]";
     }
@@ -180,7 +183,7 @@ export async function getFileContent(
 export function downloadFile(
   content: string,
   filename: string,
-  mimeType: string = "text/plain",
+  mimeType: string = "text/plain"
 ) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
