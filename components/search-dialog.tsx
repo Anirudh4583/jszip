@@ -211,16 +211,16 @@ export function SearchDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center space-x-2">
             <Search className="w-5 h-5" />
             <span>Search in Archive</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 flex-1 min-h-0">
-          <div className="relative">
+        <div className="flex flex-col flex-1 min-h-0 space-y-4">
+          <div className="relative flex-shrink-0">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search for text in files..."
@@ -242,7 +242,7 @@ export function SearchDialog({
           </div>
 
           {query && (
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center justify-between text-sm text-muted-foreground flex-shrink-0">
               <div className="flex items-center space-x-4">
                 <span>
                   {searchStats.matches} matches in {searchStats.files} files
@@ -260,69 +260,71 @@ export function SearchDialog({
             </div>
           )}
 
-          <ScrollArea className="flex-1 border rounded-lg">
-            <div className="p-2 space-y-2">
-              {results.length === 0 && query && !isSearching ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No matches found for &quot;{query}&quot;</p>
-                </div>
-              ) : (
-                results.map((result, resultIndex) => (
-                  <div
-                    key={`${result.file.path}-${resultIndex}`}
-                    className="border rounded-lg p-3 space-y-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <FileText className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium text-sm">
-                        {result.file.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {result.file.path}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">
-                        {result.matches.length} matches
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-1">
-                      {result.matches.slice(0, 5).map((match, matchIndex) => (
-                        <button
-                          key={`${result.file.path}-${match.line}-${matchIndex}`}
-                          className={cn(
-                            "w-full text-left p-2 rounded border hover:bg-accent/50 transition-colors",
-                            "text-sm font-mono"
-                          )}
-                          onClick={() => handleResultClick(result, match)}
-                        >
-                          <div className="flex items-start space-x-2">
-                            <span className="text-xs text-muted-foreground min-w-[3rem] text-right">
-                              {match.line}:
-                            </span>
-                            <div className="flex-1 truncate">
-                              {highlightMatch(
-                                match.content,
-                                match.matchStart,
-                                match.matchEnd
-                              )}
-                            </div>
-                            <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                          </div>
-                        </button>
-                      ))}
-
-                      {result.matches.length > 5 && (
-                        <div className="text-xs text-muted-foreground text-center py-1">
-                          ... and {result.matches.length - 5} more matches
-                        </div>
-                      )}
-                    </div>
+          <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full border rounded-lg">
+              <div className="p-2 space-y-2">
+                {results.length === 0 && query && !isSearching ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Search className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>No matches found for &quot;{query}&quot;</p>
                   </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
+                ) : (
+                  results.map((result, resultIndex) => (
+                    <div
+                      key={`${result.file.path}-${resultIndex}`}
+                      className="border rounded-lg p-3 space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <FileText className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-medium text-sm">
+                          {result.file.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {result.file.path}
+                        </span>
+                        <Badge variant="secondary" className="text-xs">
+                          {result.matches.length} matches
+                        </Badge>
+                      </div>
+
+                      <div className="space-y-1">
+                        {result.matches.slice(0, 5).map((match, matchIndex) => (
+                          <button
+                            key={`${result.file.path}-${match.line}-${matchIndex}`}
+                            className={cn(
+                              "w-full text-left p-2 rounded border hover:bg-accent/50 transition-colors",
+                              "text-sm font-mono"
+                            )}
+                            onClick={() => handleResultClick(result, match)}
+                          >
+                            <div className="flex items-start space-x-2">
+                              <span className="text-xs text-muted-foreground min-w-[3rem] text-right">
+                                {match.line}:
+                              </span>
+                              <div className="flex-1 truncate">
+                                {highlightMatch(
+                                  match.content,
+                                  match.matchStart,
+                                  match.matchEnd
+                                )}
+                              </div>
+                              <ChevronRight className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+                            </div>
+                          </button>
+                        ))}
+
+                        {result.matches.length > 5 && (
+                          <div className="text-xs text-muted-foreground text-center py-1">
+                            ... and {result.matches.length - 5} more matches
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
