@@ -104,7 +104,7 @@ function FileTreeNode({
   const isSelected = selectedFile === node.path;
   const { icon: Icon, openIcon: OpenIcon } = getFileIcon(
     node.name,
-    node.isDirectory,
+    node.isDirectory
   );
   const DisplayIcon = node.isDirectory
     ? isExpanded && OpenIcon
@@ -132,7 +132,7 @@ function FileTreeNode({
           "flex items-center space-x-1.5 py-1 px-1.5 rounded-md cursor-pointer transition-all duration-200",
           "hover:bg-accent/50 group",
           isSelected && "bg-primary/10 border border-primary/20",
-          level > 0 && "ml-4",
+          level > 0 && "ml-4"
         )}
         style={{ paddingLeft: `${level * 12 + 6}px` }}
         onClick={handleClick}
@@ -153,7 +153,7 @@ function FileTreeNode({
               "w-4 h-4",
               node.isDirectory
                 ? "text-blue-500 dark:text-blue-400"
-                : "text-muted-foreground",
+                : "text-muted-foreground"
             )}
           />
         </div>
@@ -163,7 +163,7 @@ function FileTreeNode({
             <span
               className={cn(
                 "truncate text-sm",
-                isSelected && "font-medium text-primary",
+                isSelected && "font-medium text-primary"
               )}
             >
               {node.name}
