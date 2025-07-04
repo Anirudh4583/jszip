@@ -40,6 +40,7 @@ interface TabbedEditorProps {
   files: { file: FileNode; content: string }[];
   onFileDownload: (file: FileNode) => void;
   onSearchOpen: () => void;
+  onCloseTab: (filePath: string) => void;
   highlightLine?: number;
 }
 
@@ -105,6 +106,7 @@ export function TabbedEditor({
   files,
   onFileDownload,
   onSearchOpen,
+  onCloseTab,
   highlightLine,
 }: TabbedEditorProps) {
   const { theme } = useTheme();
@@ -128,6 +130,8 @@ export function TabbedEditor({
     if (newTabs.length > 0) {
       const lastTab = newTabs[newTabs.length - 1];
       setActiveTab(lastTab.id);
+    } else {
+      setActiveTab("");
     }
   }, [files]);
 
@@ -157,7 +161,7 @@ export function TabbedEditor({
               glyphMarginClassName: "search-highlight-glyph",
             },
           },
-        ],
+        ]
       );
 
       // Remove highlight after 3 seconds
@@ -188,8 +192,11 @@ export function TabbedEditor({
 
       // Clean up editor reference
       delete editorsRef.current[tabId];
+
+      // Notify parent component that tab was closed
+      onCloseTab(tabId);
     },
-    [activeTab],
+    [activeTab, onCloseTab]
   );
 
   const handleCopy = async (tabId: string, content: string) => {
@@ -254,6 +261,27 @@ export function TabbedEditor({
     );
   }
 
+  // Find the active tab data
+  const activeTabData = tabs.find((tab) => tab.id === activeTab);
+
+  if (!activeTabData) {
+    return (
+      <div className="flex items-center justify-center h-full text-center p-8">
+        <div>
+          <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+          <h3 className="text-lg font-medium mb-2">No active tab</h3>
+          <p className="text-muted-foreground">
+            Select a tab to view its content
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const extension = getFileExtension(activeTabData.file.name);
+  const language = getLanguageFromExtension(extension);
+  const isBinaryFile = activeTabData.content.startsWith("[Binary file");
+
   return (
     <div className="flex flex-col h-full">
       <Tabs
@@ -262,23 +290,20 @@ export function TabbedEditor({
         className="flex-1 flex flex-col"
       >
         {/* Tab Bar */}
-        <div className="border-b bg-card/50 px-1">
+        <div className="border-b bg-card/50 px-2">
           <div className="flex items-center justify-between">
             <ScrollArea className="flex-1">
-              <TabsList className="h-auto p-0.5 bg-transparent">
+              <TabsList className="h-auto p-1 bg-transparent">
                 {tabs.map((tab) => {
                   const Icon = getFileIcon(tab.file.name);
-                  const extension = getFileExtension(tab.file.name);
-                  const language = getLanguageFromExtension(extension);
-                  const isBinaryFile = tab.content.startsWith("[Binary file");
 
                   return (
                     <div key={tab.id} className="relative group">
                       <TabsTrigger
                         value={tab.id}
                         className={cn(
-                          "flex items-center space-x-1 px-2 py-1.5 text-sm max-w-[200px]",
-                          "data-[state=active]:bg-background data-[state=active]:shadow-sm",
+                          "flex items-center space-x-2 px-3 py-2 text-sm max-w-[200px]",
+                          "data-[state=active]:bg-background data-[state=active]:shadow-sm"
                         )}
                       >
                         <Icon className="w-4 h-4 flex-shrink-0" />
@@ -290,7 +315,7 @@ export function TabbedEditor({
                         size="sm"
                         className={cn(
                           "absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100",
-                          "hover:bg-destructive hover:text-destructive-foreground transition-all",
+                          "hover:bg-destructive hover:text-destructive-foreground transition-all"
                         )}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -305,7 +330,7 @@ export function TabbedEditor({
               </TabsList>
             </ScrollArea>
 
-            <div className="flex items-center space-x-1 px-2">
+            <div className="flex items-center space-x-2 px-2">
               <Button variant="outline" size="sm" onClick={onSearchOpen}>
                 <Search className="w-4 h-4 mr-2" />
                 Search
@@ -314,102 +339,94 @@ export function TabbedEditor({
           </div>
         </div>
 
-        {/* Tab Content */}
-        {tabs.map((tab) => {
-          const extension = getFileExtension(tab.file.name);
-          const language = getLanguageFromExtension(extension);
-          const isBinaryFile = tab.content.startsWith("[Binary file");
-
-          return (
-            <TabsContent
-              key={tab.id}
-              value={tab.id}
-              className="flex-1 m-0 flex flex-col"
-            >
-              {/* File Header */}
-              <div className="flex items-center justify-between p-3 border-b bg-card/50">
-                <div className="flex items-center space-x-2">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    {createElement(getFileIcon(tab.file.name), {
-                      className: "w-5 h-5 text-primary",
-                    })}
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{tab.file.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {tab.file.size
-                        ? formatBytes(tab.file.size)
-                        : "Unknown size"}{" "}
-                      • {language}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCopy(tab.id, tab.content)}
-                    disabled={isBinaryFile}
-                  >
-                    {copiedStates[tab.id] ? (
-                      <Check className="w-4 h-4 mr-2" />
-                    ) : (
-                      <Copy className="w-4 h-4 mr-2" />
-                    )}
-                    {copiedStates[tab.id] ? "Copied!" : "Copy"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onFileDownload(tab.file)}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download
-                  </Button>
-                </div>
+        {/* Single Tab Content - Only render the active tab */}
+        <TabsContent value={activeTab} className="flex-1 m-0 flex flex-col">
+          {/* File Header */}
+          <div className="flex items-center justify-between p-4 border-b bg-card/50">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                {createElement(getFileIcon(activeTabData.file.name), {
+                  className: "w-5 h-5 text-primary",
+                })}
               </div>
+              <div>
+                <h3 className="font-medium">{activeTabData.file.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {activeTabData.file.size
+                    ? formatBytes(activeTabData.file.size)
+                    : "Unknown size"}{" "}
+                  • {language}
+                </p>
+              </div>
+            </div>
 
-              {/* File Content */}
-              <div className="flex-1 overflow-hidden">
-                {isBinaryFile ? (
-                  <div className="p-4 h-full flex items-center justify-center">
-                    <div className="text-center text-muted-foreground">
-                      <File className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                      <p className="font-medium">Binary File</p>
-                      <p className="text-sm">Cannot preview binary content</p>
-                      <p className="text-xs mt-2">
-                        Use the download button to save the file
-                      </p>
-                    </div>
-                  </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  handleCopy(activeTabData.id, activeTabData.content)
+                }
+                disabled={isBinaryFile}
+              >
+                {copiedStates[activeTabData.id] ? (
+                  <Check className="w-4 h-4 mr-2" />
                 ) : (
-                  <Editor
-                    height="100%"
-                    language={language}
-                    value={tab.content}
-                    theme={theme === "dark" ? "vs-dark" : "light"}
-                    onMount={(editor) => handleEditorDidMount(editor, tab.id)}
-                    options={{
-                      readOnly: true,
-                      fontSize: 14,
-                      lineHeight: 1.5,
-                      minimap: { enabled: true },
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                      wordWrap: "on",
-                      lineNumbers: "on",
-                      glyphMargin: true,
-                      folding: true,
-                      lineDecorationsWidth: 10,
-                      lineNumbersMinChars: 3,
-                    }}
-                  />
+                  <Copy className="w-4 h-4 mr-2" />
                 )}
+                {copiedStates[activeTabData.id] ? "Copied!" : "Copy"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onFileDownload(activeTabData.file)}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
+          </div>
+
+          {/* File Content */}
+          <div className="flex-1 overflow-hidden">
+            {isBinaryFile ? (
+              <div className="p-4 h-full flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <File className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="font-medium">Binary File</p>
+                  <p className="text-sm">Cannot preview binary content</p>
+                  <p className="text-xs mt-2">
+                    Use the download button to save the file
+                  </p>
+                </div>
               </div>
-            </TabsContent>
-          );
-        })}
+            ) : (
+              <Editor
+                height="100%"
+                language={language}
+                value={activeTabData.content}
+                theme={theme === "dark" ? "vs-dark" : "light"}
+                onMount={(editor) =>
+                  handleEditorDidMount(editor, activeTabData.id)
+                }
+                options={{
+                  readOnly: true,
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  minimap: { enabled: true },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  wordWrap: "on",
+                  lineNumbers: "on",
+                  glyphMargin: true,
+                  folding: true,
+                  lineDecorationsWidth: 10,
+                  lineNumbersMinChars: 3,
+                }}
+              />
+            )}
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
